@@ -570,17 +570,12 @@ static void running(uint32_t color1, uint32_t color2, bool theatre = false) {
 /*
  *
  */
-static void 1d_eater_cellular_automaton() {
-  const int cols = SEGLEN;
-  const unsigned maxIndex = cols;
+static void 1d_eater_automaton() {
+  const unsigned maxIndex = SEGLEN;
 
   if (!SEGENV.allocateData(SEGMENT.length() * sizeof(byte))) FX_FALLBACK_STATIC; // allocation failed
 
   byte *cells = reinterpret_cast<byte*> (SEGENV.data);
-
-  uint16_t& generation = SEGENV.aux0, &gliderLength = SEGENV.aux1; // rename aux variables for clarity
-  bool mutate = SEGMENT.check3;
-  uint8_t blur = map(SEGMENT.custom1, 0, 255, 255, 4);
 
   uint32_t color1 = SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 0);
   uint32_t color2 = SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 0);
@@ -590,13 +585,9 @@ static void 1d_eater_cellular_automaton() {
   
   // Initialize strip with random colors
   if (setup) {
-    SEGENV.step = strip.now + 1280; // show initial state for 1.28 seconds
-    generation = 1;
-    paused = true;
-    //Setup Grid
     memset(cells, 0, maxIndex * sizeof(Cell));
 
-    for (unsigned i = 0; i < maxIndex; i++) {
+    for (int i = 0; i < maxIndex; i++) {
       uint8_t dieRoll = hw_random8();
 
       if (dieRoll <= 85)
@@ -660,7 +651,7 @@ static void 1d_eater_cellular_automaton() {
     SEGMENT.setPixelColor(i, cells[i]);
   }
 }
-static const char _data_FX_MODE_1D_EATER_CELLULAR_AUTOMATON[] PROGMEM = "1D_Eater@!,Gap size;!,!;!";
+static const char _data_FX_MODE_1D_EATER_AUTOMATON[] PROGMEM = "1D Eater@!,Gap size;!,!;!";
 
 /*
  * Theatre-style crawling lights.
@@ -11087,6 +11078,7 @@ void WS2812FX::setupEffectData() {
   addEffect(FX_MODE_SCAN, &mode_scan, _data_FX_MODE_SCAN);
   addEffect(FX_MODE_DUAL_SCAN, &mode_dual_scan, _data_FX_MODE_DUAL_SCAN);
   addEffect(FX_MODE_FADE, &mode_fade, _data_FX_MODE_FADE);
+  addEffect(FX_MODE_1D_EATER_AUTOMATON, &mode_1d_eater_automaton, _data_FX_MODE_1D_EATER_AUTOMATON);
   addEffect(FX_MODE_THEATER_CHASE, &mode_theater_chase, _data_FX_MODE_THEATER_CHASE);
   addEffect(FX_MODE_THEATER_CHASE_RAINBOW, &mode_theater_chase_rainbow, _data_FX_MODE_THEATER_CHASE_RAINBOW);
   addEffect(FX_MODE_RUNNING_LIGHTS, &mode_running_lights, _data_FX_MODE_RUNNING_LIGHTS);
