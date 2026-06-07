@@ -567,6 +567,100 @@ static void running(uint32_t color1, uint32_t color2, bool theatre = false) {
   }
 }
 
+/*
+ *
+ */
+static void 1d_eater_cellular_automaton() {
+  const int cols = SEGLEN;
+  const unsigned maxIndex = cols;
+
+  if (!SEGENV.allocateData(SEGMENT.length() * sizeof(byte))) FX_FALLBACK_STATIC; // allocation failed
+
+  byte *cells = reinterpret_cast<byte*> (SEGENV.data);
+
+  uint16_t& generation = SEGENV.aux0, &gliderLength = SEGENV.aux1; // rename aux variables for clarity
+  bool mutate = SEGMENT.check3;
+  uint8_t blur = map(SEGMENT.custom1, 0, 255, 255, 4);
+
+  uint32_t color1 = SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 0);
+  uint32_t color2 = SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 0);
+  uint32_t color3 = SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 0);
+
+  bool setup = SEGENV.call == 0;
+  
+  // Initialize strip with random colors
+  if (setup) {
+    SEGENV.step = strip.now + 1280; // show initial state for 1.28 seconds
+    generation = 1;
+    paused = true;
+    //Setup Grid
+    memset(cells, 0, maxIndex * sizeof(Cell));
+
+    for (unsigned i = 0; i < maxIndex; i++) {
+      uint8_t dieRoll = hw_random8();
+
+      if (dieRoll <= 85)
+      {
+        cells[i] = color1;
+      }
+      else if (dieRoll <= 171)
+      {
+        cells[i] = color2;
+      }
+      else
+      {
+        cells[i] = color3;
+      }
+
+      SEGMENT.setPixelColor(i, cells[i]);
+    }
+  }
+
+  // OK, let's try this:
+  // for each "cell" i
+  // use uint32_t cellColor = SEGMENT.getPixelColor(i) to get the cell's current color.
+  // use uint32_t cellColor to get the colors of the cells neighbors.
+  // Update the value of the cell in the byte array based on these values.
+  // How about an "eater" rule:
+  //  If there is at least one neighbor with color = eaterColor then change cell color to that color
+  //  else color stays the same.
+  for (int i = 0; i < maxIndex; i++) {
+    int left = i - 1;
+    if (left < 0) {
+      left = maxIndex - 1;
+    }
+
+    int right = i + 1;
+    if (right > maxIndex - 1)
+    {
+      right = 0;
+    }
+
+    uint32_t leftColor = SEGMENT.getPixelColor(left);
+    uint32_t rightColor = SEGMENT.getPixelColor(right);
+    uint32_t currentColor = SEGMENT.getPixelColor(i);
+
+    uint32_t eaterColor = color2;
+    if (currentColor == color1)
+    {
+      eaterColor = color3;
+    }
+    else if (currentColor == color2)
+    {
+      eaterColor = color1;
+    }
+
+    if (leftColor == eaterColor || rightColor == eaterColor) {
+      cells[i] = eaterColor;
+    }
+  }
+
+  // Update "cells"
+  for(int i = 0; i < maxIndex; i++) {
+    SEGMENT.setPixelColor(i, cells[i]);
+  }
+}
+static const char _data_FX_MODE_1D_EATER_CELLULAR_AUTOMATON[] PROGMEM = "1D_Eater@!,Gap size;!,!;!";
 
 /*
  * Theatre-style crawling lights.
