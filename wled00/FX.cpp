@@ -570,22 +570,22 @@ static void running(uint32_t color1, uint32_t color2, bool theatre = false) {
 /*
  *
  */
-static void 1d_eater_automaton() {
+static void mode_oned_eater_automaton() {
   const unsigned maxIndex = SEGLEN;
 
   if (!SEGENV.allocateData(SEGMENT.length() * sizeof(byte))) FX_FALLBACK_STATIC; // allocation failed
 
   byte *cells = reinterpret_cast<byte*> (SEGENV.data);
 
-  uint32_t color1 = SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 0);
-  uint32_t color2 = SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 0);
-  uint32_t color3 = SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 0);
+  uint32_t color1 = RED;
+  uint32_t color2 = GREEN;
+  uint32_t color3 = BLUE;
 
   bool setup = SEGENV.call == 0;
   
   // Initialize strip with random colors
   if (setup) {
-    memset(cells, 0, maxIndex * sizeof(Cell));
+    memset(cells, 0, maxIndex * sizeof(byte));
 
     for (int i = 0; i < maxIndex; i++) {
       uint8_t dieRoll = hw_random8();
@@ -651,7 +651,7 @@ static void 1d_eater_automaton() {
     SEGMENT.setPixelColor(i, cells[i]);
   }
 }
-static const char _data_FX_MODE_1D_EATER_AUTOMATON[] PROGMEM = "1D Eater@!,Gap size;!,!;!";
+static const char _data_FX_MODE_oned_eater_automaton[] PROGMEM = "1D Eater@!,Gap size;!,!;!";
 
 /*
  * Theatre-style crawling lights.
@@ -11078,7 +11078,7 @@ void WS2812FX::setupEffectData() {
   addEffect(FX_MODE_SCAN, &mode_scan, _data_FX_MODE_SCAN);
   addEffect(FX_MODE_DUAL_SCAN, &mode_dual_scan, _data_FX_MODE_DUAL_SCAN);
   addEffect(FX_MODE_FADE, &mode_fade, _data_FX_MODE_FADE);
-  addEffect(FX_MODE_1D_EATER_AUTOMATON, &mode_1d_eater_automaton, _data_FX_MODE_1D_EATER_AUTOMATON);
+  addEffect(FX_MODE_ONED_EATER_AUTOMATON, &mode_oned_eater_automaton, _data_FX_MODE_oned_eater_automaton);
   addEffect(FX_MODE_THEATER_CHASE, &mode_theater_chase, _data_FX_MODE_THEATER_CHASE);
   addEffect(FX_MODE_THEATER_CHASE_RAINBOW, &mode_theater_chase_rainbow, _data_FX_MODE_THEATER_CHASE_RAINBOW);
   addEffect(FX_MODE_RUNNING_LIGHTS, &mode_running_lights, _data_FX_MODE_RUNNING_LIGHTS);
